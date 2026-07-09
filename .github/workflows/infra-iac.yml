@@ -64,7 +64,7 @@ jobs:
           terraform init \
             -backend-config="bucket=${TF_STATE_BUCKET}" \
             -backend-config="key=wiz-aws-devsecops-lab/terraform.tfstate" \
-            -backend-config="region=${TF_BACKEND_REGION}" \
+            -backend-config="region=us-east-1" \
             -backend-config="dynamodb_table=${TF_STATE_LOCK_TABLE}" \
             -backend-config="encrypt=true"
 
