@@ -29,6 +29,7 @@ env:
   TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
   TF_STATE_LOCK_TABLE: ${{ vars.TF_STATE_LOCK_TABLE }}
   ADMIN_CIDR: ${{ vars.ADMIN_CIDR }}
+  SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
 
 jobs:
   terraform:
@@ -89,6 +90,7 @@ jobs:
           terraform plan \
             -var="aws_region=${AWS_REGION}" \
             -var="admin_cidr=${ADMIN_CIDR}" \
+            -var="ssh_public_key=${SSH_PUBLIC_KEY}" \
             -out=tfplan
 
       - name: Terraform apply
