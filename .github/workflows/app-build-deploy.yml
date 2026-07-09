@@ -139,9 +139,14 @@ jobs:
         run: |
           sed "s|IMAGE_PLACEHOLDER|$IMAGE_URI|g" k8s/deployment.yaml | kubectl apply -f -
 
-          kubectl apply -f k8s/service.yaml
-          kubectl apply -f k8s/ingress.yaml
-          kubectl apply -f k8s/rbac-cluster-admin.yaml
+          for file in k8s/service.yaml k8s/ingress.yaml k8s/rbac-cluster-admin.yaml; do
+            if [ -f "$file" ]; then
+              echo "Applying $file"
+              kubectl apply -f "$file"
+            else
+              echo "Skipping missing file: $file"
+            fi
+          done
 
       - name: Wait for application rollout
         run: |
