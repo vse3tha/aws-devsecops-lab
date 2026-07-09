@@ -43,6 +43,18 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Validate required GitHub variables
+        run: |
+          test -n "$AWS_REGION" || { echo "AWS_REGION is missing"; exit 1; }
+          test -n "$EKS_CLUSTER_NAME" || { echo "EKS_CLUSTER_NAME is missing"; exit 1; }
+          test -n "$ECR_REPOSITORY" || { echo "ECR_REPOSITORY is missing"; exit 1; }
+          test -n "$MONGO_URI_SSM_PARAMETER" || { echo "MONGO_URI_SSM_PARAMETER is missing"; exit 1; }
+
+          echo "AWS_REGION=$AWS_REGION"
+          echo "EKS_CLUSTER_NAME=$EKS_CLUSTER_NAME"
+          echo "ECR_REPOSITORY=$ECR_REPOSITORY"
+          echo "MONGO_URI_SSM_PARAMETER=$MONGO_URI_SSM_PARAMETER"
+
       - name: Set image URI
         run: |
           echo "IMAGE_URI=${{ steps.ecr-login.outputs.registry }}/${ECR_REPOSITORY}:${IMAGE_TAG}" >> $GITHUB_ENV
