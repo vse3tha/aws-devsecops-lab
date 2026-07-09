@@ -1,22 +1,23 @@
 name: infra-iac
 
 on:
-  workflow_dispatch:
-    inputs:
-      apply:
-        description: "Apply Terraform changes?"
-        required: true
-        default: "false"
-        type: choice
-        options:
-          - "false"
-          - "true"
   push:
     branches:
       - main
     paths:
       - "infra/**"
       - ".github/workflows/infra-iac.yml"
+
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply Terraform changes?"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
 
 permissions:
   id-token: write
@@ -31,6 +32,7 @@ env:
   TF_STATE_LOCK_TABLE: ${{ vars.TF_STATE_LOCK_TABLE }}
   ADMIN_CIDR: ${{ vars.ADMIN_CIDR }}
   SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
+  PROJECT: ${{ vars.PROJECT }}
 
 jobs:
   terraform:
@@ -64,7 +66,7 @@ jobs:
           terraform init \
             -backend-config="bucket=${TF_STATE_BUCKET}" \
             -backend-config="key=${PROJECT}/${AWS_REGION}/terraform.tfstate" \
-            -backend-config="region=us-east-1" \
+            -backend-config="region=${TF_BACKEND_REGION}" \
             -backend-config="dynamodb_table=${TF_STATE_LOCK_TABLE}" \
             -backend-config="encrypt=true"
 
@@ -90,11 +92,12 @@ jobs:
         run: |
           terraform plan \
             -var="aws_region=${AWS_REGION}" \
-	    -var="project=${PROJECT}" \
+            -var="project=${PROJECT}" \
+            -var="name_prefix=${PROJECT}" \
             -var="admin_cidr=${ADMIN_CIDR}" \
             -var="ssh_public_key=${SSH_PUBLIC_KEY}" \
             -out=tfplan
 
       - name: Terraform apply
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.apply == 'true'
+        if: github.event_name == 'push' || github.event.inputs.apply == 'true'
         run: terraform apply -auto-approve tfplan
