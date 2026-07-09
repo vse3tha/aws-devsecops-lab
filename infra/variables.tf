@@ -1,3 +1,9 @@
+variable "name_prefix" {
+  type        = string
+  description = "Common prefix used for AWS resource names"
+  default     = "wiz-devsecops-lab"
+}
+
 variable "aws_region" {
   type        = string
   description = "AWS region to deploy the lab."
