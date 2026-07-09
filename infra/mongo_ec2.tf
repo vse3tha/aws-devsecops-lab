@@ -93,13 +93,7 @@ resource "aws_iam_instance_profile" "mongo" {
 }
 
 resource "aws_s3_bucket" "mongo_backups" {
-  bucket        = "${var.project}-mongo-backups-${data.aws_caller_identity.current.account_id}"
-  force_destroy = true
-
-  tags = merge(local.common_tags, {
-    Name     = "${var.project}-mongo-backups"
-    Exposure = "INTENTIONAL_PUBLIC_READ_AND_LIST"
-  })
+  bucket = "${var.name_prefix}-mongo-backups-${data.aws_caller_identity.current.account_id}-${var.aws_region}"
 }
 
 resource "aws_s3_bucket_ownership_controls" "mongo_backups" {

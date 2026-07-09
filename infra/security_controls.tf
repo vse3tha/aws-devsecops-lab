@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "config_logs" {
   count  = var.enable_aws_config ? 1 : 0
-  bucket = "${var.name_prefix}-config-logs-${data.aws_caller_identity.current.account_id}"
+  bucket = "${var.name_prefix}-aws-config-${data.aws_caller_identity.current.account_id}-${var.aws_region}"
 }
 
 resource "aws_s3_bucket_public_access_block" "config_logs" {
@@ -54,8 +54,8 @@ resource "aws_iam_role_policy" "config_s3" {
         Resource = aws_s3_bucket.config_logs[0].arn
       },
       {
-        Effect = "Allow"
-        Action = "s3:PutObject"
+        Effect   = "Allow"
+        Action   = "s3:PutObject"
         Resource = "${aws_s3_bucket.config_logs[0].arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
         Condition = {
           StringEquals = {

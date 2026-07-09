@@ -7,7 +7,7 @@ variable "name_prefix" {
 variable "aws_region" {
   type        = string
   description = "AWS region to deploy the lab."
-  default     = "us-east-1"
+  default     = "us-west-2"
 }
 
 variable "project" {
