@@ -22,10 +22,9 @@ variable "admin_cidr" {
   default     = "0.0.0.0/0"
 }
 
-variable "ssh_public_key_path" {
+variable "ssh_public_key" {
   type        = string
-  description = "Path to SSH public key used for the MongoDB EC2 key pair."
-  default     = "~/.ssh/id_rsa.pub"
+  description = "Public SSH key for MongoDB EC2 access"
 }
 
 variable "mongo_db_name" {
