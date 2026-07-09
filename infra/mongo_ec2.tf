@@ -27,7 +27,7 @@ data "aws_ami" "ubuntu_2004" {
 
 resource "aws_key_pair" "mongo" {
   key_name   = "${var.project}-mongo-key"
-  public_key = file(pathexpand(var.ssh_public_key_path))
+  public_key = var.ssh_public_key
 }
 
 resource "aws_security_group" "mongo" {
