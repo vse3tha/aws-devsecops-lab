@@ -121,9 +121,9 @@ jobs:
         run: |
           kubectl create namespace wiz-lab --dry-run=client -o yaml | kubectl apply -f -
 
-          kubectl -n wiz-lab create secret generic mongo-secret \
-            --from-literal=MONGO_URI="$MONGO_URI" \
-            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n wiz-lab create secret generic mongo-uri \
+          --from-literal=MONGO_URI="$MONGO_URI" \
+          --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Install or update NGINX Ingress Controller
         run: |
