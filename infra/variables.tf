@@ -29,18 +29,18 @@ variable "ssh_public_key_path" {
 }
 
 variable "mongo_db_name" {
-  type        = string
-  default     = "appdb"
+  type    = string
+  default = "appdb"
 }
 
 variable "mongo_app_user" {
-  type        = string
-  default     = "appuser"
+  type    = string
+  default = "appuser"
 }
 
 variable "mongo_admin_user" {
-  type        = string
-  default     = "admin"
+  type    = string
+  default = "admin"
 }
 
 variable "eks_version" {
@@ -50,8 +50,8 @@ variable "eks_version" {
 }
 
 variable "node_instance_types" {
-  type        = list(string)
-  default     = ["t3.medium"]
+  type    = list(string)
+  default = ["t3.medium"]
 }
 
 variable "node_desired_size" {

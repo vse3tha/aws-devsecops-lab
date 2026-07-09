@@ -32,9 +32,9 @@ resource "aws_iam_role" "config" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Service = "config.amazonaws.com" }
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
@@ -51,25 +51,25 @@ resource "aws_s3_bucket_policy" "config_logs" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "AWSConfigBucketPermissionsCheck"
-        Effect = "Allow"
+        Sid       = "AWSConfigBucketPermissionsCheck"
+        Effect    = "Allow"
         Principal = { Service = "config.amazonaws.com" }
-        Action   = "s3:GetBucketAcl"
-        Resource = aws_s3_bucket.config_logs.arn
+        Action    = "s3:GetBucketAcl"
+        Resource  = aws_s3_bucket.config_logs.arn
       },
       {
-        Sid    = "AWSConfigBucketExistenceCheck"
-        Effect = "Allow"
+        Sid       = "AWSConfigBucketExistenceCheck"
+        Effect    = "Allow"
         Principal = { Service = "config.amazonaws.com" }
-        Action   = "s3:ListBucket"
-        Resource = aws_s3_bucket.config_logs.arn
+        Action    = "s3:ListBucket"
+        Resource  = aws_s3_bucket.config_logs.arn
       },
       {
-        Sid    = "AWSConfigBucketDelivery"
-        Effect = "Allow"
+        Sid       = "AWSConfigBucketDelivery"
+        Effect    = "Allow"
         Principal = { Service = "config.amazonaws.com" }
-        Action   = "s3:PutObject"
-        Resource = "${aws_s3_bucket.config_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
+        Action    = "s3:PutObject"
+        Resource  = "${aws_s3_bucket.config_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
         Condition = {
           StringEquals = {
             "s3:x-amz-acl" = "bucket-owner-full-control"
