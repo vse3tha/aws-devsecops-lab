@@ -68,6 +68,11 @@ variable "node_max_size" {
   default = 3
 }
 
+variable "enable_aws_config" {
+  type    = bool
+  default = false
+}
+
 variable "enable_guardduty" {
   type        = bool
   description = "Enable GuardDuty detector with EKS audit-log monitoring where supported."
