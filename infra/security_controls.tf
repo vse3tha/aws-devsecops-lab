@@ -27,6 +27,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "config_logs" {
 }
 
 resource "aws_iam_role" "config" {
+  count    = var.enable_aws_config ? 1 : 0
   name = "${var.project}-aws-config-role"
 
   assume_role_policy = jsonencode({
@@ -81,27 +82,22 @@ resource "aws_s3_bucket_policy" "config_logs" {
 }
 
 resource "aws_config_configuration_recorder" "main" {
-  name     = "${var.project}-recorder"
-  role_arn = aws_iam_role.config.arn
-
-  recording_group {
-    all_supported                 = true
-    include_global_resource_types = true
-  }
-
-  depends_on = [aws_iam_role_policy_attachment.config_managed]
+  count    = var.enable_aws_config ? 1 : 0
+  name     = "${var.project_name}-recorder"
+  role_arn = aws_iam_role.config[0].arn
 }
 
 resource "aws_config_delivery_channel" "main" {
-  name           = "${var.project}-delivery-channel"
-  s3_bucket_name = aws_s3_bucket.config_logs.bucket
-
-  depends_on = [aws_s3_bucket_policy.config_logs]
+  count          = var.enable_aws_config ? 1 : 0
+  name           = "${var.project_name}-delivery-channel"
+  s3_bucket_name = aws_s3_bucket.config_logs[0].bucket
 }
 
 resource "aws_config_configuration_recorder_status" "main" {
-  name       = aws_config_configuration_recorder.main.name
+  count      = var.enable_aws_config ? 1 : 0
+  name       = aws_config_configuration_recorder.main[0].name
   is_enabled = true
+
   depends_on = [aws_config_delivery_channel.main]
 }
 
