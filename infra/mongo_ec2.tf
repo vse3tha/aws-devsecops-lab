@@ -184,7 +184,7 @@ resource "aws_ssm_parameter" "mongo_uri" {
   name        = "/${var.project}/mongo_uri"
   description = "MongoDB URI consumed by the EKS application pipeline"
   type        = "SecureString"
-  value       = "mongodb://${var.mongo_app_user}:${random_password.mongo_app.result}@${aws_instance.mongo.private_ip}:27017/${var.mongo_db_name}?authSource=${var.mongo_db_name}"
+  value       = value = value = "mongodb://${var.mongo_app_user}:${urlencode(random_password.mongo_app.result)}@${aws_instance.mongo.private_ip}:27017/${var.mongo_db_name}?authSource=${var.mongo_db_name}"
 
   tags = local.common_tags
 }
