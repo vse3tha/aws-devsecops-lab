@@ -1,0 +1,7 @@
+aws_region = "us-east-1"
+project    = "wiz-devsecops-lab"
+admin_cidr = "0.0.0.0/0" # lab only; use your_public_ip/32 where possible
+
+# ssh_public_key_path = "~/.ssh/id_rsa.pub"
+# eks_version         = "1.30"
+# node_instance_types = ["t3.medium"]
