@@ -18,7 +18,7 @@ spec:
       serviceAccountName: wiz-todo-sa
       containers:
         - name: wiz-todo
-          image: ${IMAGE_URI}
+          image: IMAGE_PLACEHOLDER
           imagePullPolicy: Always
           ports:
             - name: http
