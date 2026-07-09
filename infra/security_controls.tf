@@ -1,76 +1,62 @@
-# Native AWS security controls for the demo.
-# These controls intentionally detect/report the lab weaknesses rather than remove all of them.
-
 resource "aws_s3_bucket" "config_logs" {
-  bucket        = "${var.project}-aws-config-${data.aws_caller_identity.current.account_id}"
-  force_destroy = true
-
-  tags = merge(local.common_tags, { Name = "${var.project}-config-logs" })
+  count  = var.enable_aws_config ? 1 : 0
+  bucket = "${var.name_prefix}-config-logs-${data.aws_caller_identity.current.account_id}"
 }
 
 resource "aws_s3_bucket_public_access_block" "config_logs" {
-  bucket                  = aws_s3_bucket.config_logs.id
+  count  = var.enable_aws_config ? 1 : 0
+  bucket = aws_s3_bucket.config_logs[0].id
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "config_logs" {
-  bucket = aws_s3_bucket.config_logs.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
 resource "aws_iam_role" "config" {
-  count    = var.enable_aws_config ? 1 : 0
-  name = "${var.project}-aws-config-role"
+  count = var.enable_aws_config ? 1 : 0
+  name  = "${var.name_prefix}-aws-config-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect    = "Allow"
-      Principal = { Service = "config.amazonaws.com" }
-      Action    = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "config.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
     }]
   })
 }
 
 resource "aws_iam_role_policy_attachment" "config_managed" {
-  role       = aws_iam_role.config.name
+  count      = var.enable_aws_config ? 1 : 0
+  role       = aws_iam_role.config[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWS_ConfigRole"
 }
 
-resource "aws_s3_bucket_policy" "config_logs" {
-  bucket = aws_s3_bucket.config_logs.id
+resource "aws_iam_role_policy" "config_s3" {
+  count = var.enable_aws_config ? 1 : 0
+  name  = "${var.name_prefix}-aws-config-s3-policy"
+  role  = aws_iam_role.config[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "AWSConfigBucketPermissionsCheck"
-        Effect    = "Allow"
-        Principal = { Service = "config.amazonaws.com" }
-        Action    = "s3:GetBucketAcl"
-        Resource  = aws_s3_bucket.config_logs.arn
+        Effect   = "Allow"
+        Action   = "s3:GetBucketAcl"
+        Resource = aws_s3_bucket.config_logs[0].arn
       },
       {
-        Sid       = "AWSConfigBucketExistenceCheck"
-        Effect    = "Allow"
-        Principal = { Service = "config.amazonaws.com" }
-        Action    = "s3:ListBucket"
-        Resource  = aws_s3_bucket.config_logs.arn
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = aws_s3_bucket.config_logs[0].arn
       },
       {
-        Sid       = "AWSConfigBucketDelivery"
-        Effect    = "Allow"
-        Principal = { Service = "config.amazonaws.com" }
-        Action    = "s3:PutObject"
-        Resource  = "${aws_s3_bucket.config_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
+        Effect = "Allow"
+        Action = "s3:PutObject"
+        Resource = "${aws_s3_bucket.config_logs[0].arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
         Condition = {
           StringEquals = {
             "s3:x-amz-acl" = "bucket-owner-full-control"
@@ -83,14 +69,23 @@ resource "aws_s3_bucket_policy" "config_logs" {
 
 resource "aws_config_configuration_recorder" "main" {
   count    = var.enable_aws_config ? 1 : 0
-  name     = "${var.project_name}-recorder"
+  name     = "${var.name_prefix}-recorder"
   role_arn = aws_iam_role.config[0].arn
+
+  recording_group {
+    all_supported                 = true
+    include_global_resource_types = true
+  }
+
+  depends_on = [aws_iam_role_policy_attachment.config_managed]
 }
 
 resource "aws_config_delivery_channel" "main" {
   count          = var.enable_aws_config ? 1 : 0
-  name           = "${var.project_name}-delivery-channel"
+  name           = "${var.name_prefix}-delivery-channel"
   s3_bucket_name = aws_s3_bucket.config_logs[0].bucket
+
+  depends_on = [aws_config_configuration_recorder.main]
 }
 
 resource "aws_config_configuration_recorder_status" "main" {
@@ -102,7 +97,8 @@ resource "aws_config_configuration_recorder_status" "main" {
 }
 
 resource "aws_config_config_rule" "s3_public_read" {
-  name = "${var.project}-s3-bucket-public-read-prohibited"
+  count = var.enable_aws_config ? 1 : 0
+  name  = "${var.name_prefix}-s3-public-read-prohibited"
 
   source {
     owner             = "AWS"
@@ -113,7 +109,8 @@ resource "aws_config_config_rule" "s3_public_read" {
 }
 
 resource "aws_config_config_rule" "restricted_ssh" {
-  name = "${var.project}-restricted-ssh"
+  count = var.enable_aws_config ? 1 : 0
+  name  = "${var.name_prefix}-restricted-ssh"
 
   source {
     owner             = "AWS"
@@ -127,4 +124,3 @@ resource "aws_guardduty_detector" "main" {
   count  = var.enable_guardduty ? 1 : 0
   enable = true
 }
-
