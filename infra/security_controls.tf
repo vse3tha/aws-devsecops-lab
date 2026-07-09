@@ -123,18 +123,8 @@ resource "aws_config_config_rule" "restricted_ssh" {
   depends_on = [aws_config_configuration_recorder_status.main]
 }
 
-
 resource "aws_guardduty_detector" "main" {
   count  = var.enable_guardduty ? 1 : 0
   enable = true
-
-  datasources {
-    kubernetes {
-      audit_logs {
-        enable = true
-      }
-    }
-  }
-
-  tags = merge(local.common_tags, { Name = "${var.project}-guardduty" })
 }
+
