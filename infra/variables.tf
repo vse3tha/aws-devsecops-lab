@@ -76,7 +76,7 @@ variable "enable_aws_config" {
 variable "enable_guardduty" {
   type        = bool
   description = "Enable GuardDuty detector with EKS audit-log monitoring where supported."
-  default     = true
+  default     = false
 }
 
 variable "tags" {
